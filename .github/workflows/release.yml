@@ -1,0 +1,116 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - goos: darwin
+            goarch: arm64
+          - goos: darwin
+            goarch: amd64
+          - goos: linux
+            goarch: amd64
+          - goos: linux
+            goarch: arm64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Build
+        env:
+          CGO_ENABLED: "0"
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: |
+          TAG=${GITHUB_REF_NAME}
+          go build \
+            -ldflags="-X main.Version=${TAG}" \
+            -o sector-zero \
+            ./game
+      - name: Archive
+        run: |
+          TAG=${GITHUB_REF_NAME}
+          ARCHIVE="sector-zero_${TAG}_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz"
+          tar czf "${ARCHIVE}" sector-zero
+          echo "ARCHIVE=${ARCHIVE}" >> "$GITHUB_ENV"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sector-zero_${{ matrix.goos }}_${{ matrix.goarch }}
+          path: ${{ env.ARCHIVE }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*
+
+  update-tap:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: Compute SHA256s and update formula
+        env:
+          TAG: ${{ github.ref_name }}
+          TAP_GITHUB_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
+        run: |
+          SHA_DARWIN_ARM64=$(sha256sum "artifacts/sector-zero_${TAG}_darwin_arm64.tar.gz" | awk '{print $1}')
+          SHA_DARWIN_AMD64=$(sha256sum "artifacts/sector-zero_${TAG}_darwin_amd64.tar.gz" | awk '{print $1}')
+
+          git clone "https://x-access-token:${TAP_GITHUB_TOKEN}@github.com/lex00/homebrew-tap.git" tap
+          cd tap
+
+          VERSION="${TAG#v}"
+          cat > Formula/sector-zero.rb <<FORMULA
+          class SectorZero < Formula
+            desc "A gamified algorithm puzzle game in your terminal"
+            homepage "https://lex00.github.io/sector-zero/"
+            version "${VERSION}"
+
+            on_macos do
+              on_arm do
+                url "https://github.com/lex00/sector-zero/releases/download/${TAG}/sector-zero_${TAG}_darwin_arm64.tar.gz"
+                sha256 "${SHA_DARWIN_ARM64}"
+              end
+              on_intel do
+                url "https://github.com/lex00/sector-zero/releases/download/${TAG}/sector-zero_${TAG}_darwin_amd64.tar.gz"
+                sha256 "${SHA_DARWIN_AMD64}"
+              end
+            end
+
+            def install
+              bin.install "sector-zero"
+            end
+
+            test do
+              assert_predicate bin/"sector-zero", :exist?
+            end
+          end
+          FORMULA
+
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add Formula/sector-zero.rb
+          git commit -m "sector-zero ${TAG}"
+          git push

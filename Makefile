@@ -1,10 +1,13 @@
-.PHONY: build run traces tidy clean
+.PHONY: build run release traces tidy clean
 
 BINARY := sector-zero
 GAME_DIR := ./game
 
 build:
 	go build -o $(BINARY) $(GAME_DIR)
+
+release:
+	go build -ldflags="-X main.Version=$(shell git describe --tags --always)" -o $(BINARY) $(GAME_DIR)
 
 run: build
 	./$(BINARY)
