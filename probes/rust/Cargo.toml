@@ -1,0 +1,10 @@
+[package]
+name = "sector-zero-probe"
+version = "0.1.0"
+edition = "2021"
+description = "Probe library for Sector Zero puzzle game"
+license = "MIT"
+
+[lib]
+name = "sector_zero_probe"
+path = "src/lib.rs"

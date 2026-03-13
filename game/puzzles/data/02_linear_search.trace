@@ -1,0 +1,11 @@
+{"v":1,"type":"init","net":"arr","values":[3,7,1,9,4,6,2]}
+{"v":1,"type":"pin","net":"arr","name":"i","pos":0}
+{"v":1,"type":"access","net":"arr","pos":0}
+{"v":1,"type":"pin","net":"arr","name":"i","pos":1}
+{"v":1,"type":"access","net":"arr","pos":1}
+{"v":1,"type":"pin","net":"arr","name":"i","pos":2}
+{"v":1,"type":"access","net":"arr","pos":2}
+{"v":1,"type":"pin","net":"arr","name":"i","pos":3}
+{"v":1,"type":"access","net":"arr","pos":3}
+{"v":1,"type":"found","net":"arr","pos":3}
+{"v":1,"type":"done","net":"arr"}

@@ -1,0 +1,261 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/lex00/sector-zero/blob/main/spec/trace.schema.json",
+  "title": "SectorZero Trace Pulse",
+  "description": "A single pulse in a Sector Zero NDJSON trace stream. Each line of a trace file must validate against this schema.",
+  "type": "object",
+  "required": ["v", "type", "net"],
+  "properties": {
+    "v": {
+      "type": "integer",
+      "const": 1,
+      "description": "Protocol version. Always 1 for the current format."
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "init", "compare", "swap", "pin", "signal",
+        "access", "found", "not_found", "bounds",
+        "split", "merge", "done"
+      ],
+      "description": "The pulse type, used as the oneOf discriminator."
+    },
+    "net": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The name of the Net (data structure) this pulse applies to."
+    }
+  },
+  "oneOf": [
+    {
+      "title": "init",
+      "description": "Declares a named Net and sets its initial values. Must be the first pulse on a given net name.",
+      "properties": {
+        "v":    { "type": "integer", "const": 1 },
+        "type": { "type": "string", "const": "init" },
+        "net":  { "type": "string", "minLength": 1 },
+        "values": {
+          "type": "array",
+          "items": { "type": "number" },
+          "description": "Initial ordered values of the Net, indexed from 0."
+        }
+      },
+      "required": ["v", "type", "net", "values"],
+      "additionalProperties": false
+    },
+    {
+      "title": "compare",
+      "description": "Signals that two positions are being compared. Does not mutate state.",
+      "properties": {
+        "v":    { "type": "integer", "const": 1 },
+        "type": { "type": "string", "const": "compare" },
+        "net":  { "type": "string", "minLength": 1 },
+        "i": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Index of the first element being compared."
+        },
+        "j": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Index of the second element being compared."
+        }
+      },
+      "required": ["v", "type", "net", "i", "j"],
+      "additionalProperties": false
+    },
+    {
+      "title": "swap",
+      "description": "Signals that two positions are being swapped. Mutates the Net's logical state.",
+      "properties": {
+        "v":    { "type": "integer", "const": 1 },
+        "type": { "type": "string", "const": "swap" },
+        "net":  { "type": "string", "minLength": 1 },
+        "i": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Index of the first element to swap."
+        },
+        "j": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Index of the second element to swap."
+        }
+      },
+      "required": ["v", "type", "net", "i", "j"],
+      "additionalProperties": false
+    },
+    {
+      "title": "pin",
+      "description": "Attaches or moves a named marker to a specific position on the Net.",
+      "properties": {
+        "v":    { "type": "integer", "const": 1 },
+        "type": { "type": "string", "const": "pin" },
+        "net":  { "type": "string", "minLength": 1 },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The pin label (e.g. 'i', 'j', 'lo', 'mid', 'pivot')."
+        },
+        "pos": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The zero-based position the pin points to."
+        }
+      },
+      "required": ["v", "type", "net", "name", "pos"],
+      "additionalProperties": false
+    },
+    {
+      "title": "signal",
+      "description": "Emits a named highlight covering a set of positions on the Net.",
+      "properties": {
+        "v":    { "type": "integer", "const": 1 },
+        "type": { "type": "string", "const": "signal" },
+        "net":  { "type": "string", "minLength": 1 },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The signal label (e.g. 'window', 'partition', 'active')."
+        },
+        "positions": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "description": "Zero-based indices covered by this signal. An empty array clears the signal."
+        }
+      },
+      "required": ["v", "type", "net", "name", "positions"],
+      "additionalProperties": false
+    },
+    {
+      "title": "access",
+      "description": "Signals a single-element read at a position. Does not mutate state.",
+      "properties": {
+        "v":    { "type": "integer", "const": 1 },
+        "type": { "type": "string", "const": "access" },
+        "net":  { "type": "string", "minLength": 1 },
+        "pos": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The zero-based position being read."
+        }
+      },
+      "required": ["v", "type", "net", "pos"],
+      "additionalProperties": false
+    },
+    {
+      "title": "found",
+      "description": "Signals that a search target was located at the given position. Terminal event for successful searches.",
+      "properties": {
+        "v":    { "type": "integer", "const": 1 },
+        "type": { "type": "string", "const": "found" },
+        "net":  { "type": "string", "minLength": 1 },
+        "pos": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The zero-based position where the target was found."
+        }
+      },
+      "required": ["v", "type", "net", "pos"],
+      "additionalProperties": false
+    },
+    {
+      "title": "not_found",
+      "description": "Signals that a search target was not present in the Net. Terminal event for unsuccessful searches.",
+      "properties": {
+        "v":    { "type": "integer", "const": 1 },
+        "type": { "type": "string", "const": "not_found" },
+        "net":  { "type": "string", "minLength": 1 }
+      },
+      "required": ["v", "type", "net"],
+      "additionalProperties": false
+    },
+    {
+      "title": "bounds",
+      "description": "Signals the current active search window as a [low, high] inclusive range.",
+      "properties": {
+        "v":    { "type": "integer", "const": 1 },
+        "type": { "type": "string", "const": "bounds" },
+        "net":  { "type": "string", "minLength": 1 },
+        "low": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Lower bound of the current search window (inclusive)."
+        },
+        "high": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Upper bound of the current search window (inclusive). Must be >= low."
+        }
+      },
+      "required": ["v", "type", "net", "low", "high"],
+      "additionalProperties": false
+    },
+    {
+      "title": "split",
+      "description": "Signals that a subarray [left, right) is being divided at mid. Used by divide-and-conquer algorithms.",
+      "properties": {
+        "v":    { "type": "integer", "const": 1 },
+        "type": { "type": "string", "const": "split" },
+        "net":  { "type": "string", "minLength": 1 },
+        "left": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Start index of the subarray (inclusive)."
+        },
+        "mid": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The split point. Left subrange is [left, mid), right subrange is [mid, right)."
+        },
+        "right": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "End index of the subarray (exclusive)."
+        }
+      },
+      "required": ["v", "type", "net", "left", "mid", "right"],
+      "additionalProperties": false
+    },
+    {
+      "title": "merge",
+      "description": "Signals that two adjacent subarrays [left, mid) and [mid, right) are being merged.",
+      "properties": {
+        "v":    { "type": "integer", "const": 1 },
+        "type": { "type": "string", "const": "merge" },
+        "net":  { "type": "string", "minLength": 1 },
+        "left": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Start index of the left subarray (inclusive)."
+        },
+        "mid": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Boundary between the two subarrays. Right subarray starts here."
+        },
+        "right": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "End index of the right subarray (exclusive)."
+        }
+      },
+      "required": ["v", "type", "net", "left", "mid", "right"],
+      "additionalProperties": false
+    },
+    {
+      "title": "done",
+      "description": "Signals that all operations on this Net are complete. Every initialized Net must end with a done pulse.",
+      "properties": {
+        "v":    { "type": "integer", "const": 1 },
+        "type": { "type": "string", "const": "done" },
+        "net":  { "type": "string", "minLength": 1 }
+      },
+      "required": ["v", "type", "net"],
+      "additionalProperties": false
+    }
+  ]
+}

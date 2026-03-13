@@ -1,0 +1,10 @@
+{
+  "name": "sector-zero-probe",
+  "version": "0.1.0",
+  "description": "Probe library for Sector Zero puzzle game",
+  "main": "probe.js",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14"
+  }
+}

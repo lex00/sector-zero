@@ -1,0 +1,7 @@
+baseURL = 'https://lex00.github.io/sector-zero/'
+languageCode = 'en-us'
+title = 'Sector Zero'
+theme = 'ananke'
+
+[params]
+  description = "A gamified algorithm puzzle game in your terminal."

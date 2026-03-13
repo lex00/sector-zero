@@ -1,0 +1,7 @@
+{"v":1,"type":"init","net":"arr","values":[11,12,22,25,34,64,90]}
+{"v":1,"type":"bounds","net":"arr","low":0,"high":6}
+{"v":1,"type":"pin","net":"arr","name":"mid","pos":3}
+{"v":1,"type":"access","net":"arr","pos":3}
+{"v":1,"type":"compare","net":"arr","i":3,"j":-1}
+{"v":1,"type":"found","net":"arr","pos":3}
+{"v":1,"type":"done","net":"arr"}
