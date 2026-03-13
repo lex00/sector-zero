@@ -4,4 +4,4 @@ title = 'Sector Zero'
 theme = 'ananke'
 
 [params]
-  description = "A gamified algorithm puzzle game in your terminal."
+  description = "A gamified algorithm puzzle game in your terminal"
