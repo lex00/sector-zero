@@ -81,3 +81,30 @@ func (p *Probe) Bounds(net string, low, high int) {
 func (p *Probe) Done(net string) {
 	emit(map[string]interface{}{"v": 1, "type": "done", "net": net})
 }
+
+// Split records a divide-and-conquer split.
+func (p *Probe) Split(net string, left, mid, right int) {
+	emit(map[string]interface{}{"v": 1, "type": "split", "net": net, "left": left, "mid": mid, "right": right})
+}
+
+// Merge records a divide-and-conquer merge.
+func (p *Probe) Merge(net string, left, mid, right int) {
+	emit(map[string]interface{}{"v": 1, "type": "merge", "net": net, "left": left, "mid": mid, "right": right})
+}
+
+// Write records a single element write-back.
+func (p *Probe) Write(net string, pos, value int) {
+	if s, ok := p.state[net]; ok {
+		if pos >= 0 && pos < len(s) {
+			s[pos] = value
+		}
+	}
+	emit(map[string]interface{}{"v": 1, "type": "write", "net": net, "pos": pos, "value": value})
+}
+
+// Lower-case aliases so Python-style template choices compile in Go.
+func (p *Probe) not_found(net string)             { p.NotFound(net) }
+func (p *Probe) found(net string, pos int)        { p.Found(net, pos) }
+func (p *Probe) split(net string, l, m, r int)    { p.Split(net, l, m, r) }
+func (p *Probe) merge(net string, l, m, r int)    { p.Merge(net, l, m, r) }
+func (p *Probe) write(net string, pos, value int) { p.Write(net, pos, value) }

@@ -1,22 +1,66 @@
-{"v":1,"type":"init","net":"arr","values":[10,80,30,90,40,50,70]}
-{"v":1,"type":"pin","net":"arr","name":"pivot","pos":6}
-{"v":1,"type":"pin","net":"arr","name":"i","pos":0}
-{"v":1,"type":"compare","net":"arr","i":0,"j":6}
-{"v":1,"type":"compare","net":"arr","i":1,"j":6}
-{"v":1,"type":"pin","net":"arr","name":"i","pos":1}
-{"v":1,"type":"swap","net":"arr","i":1,"j":2}
-{"v":1,"type":"pin","net":"arr","name":"i","pos":2}
-{"v":1,"type":"compare","net":"arr","i":2,"j":6}
-{"v":1,"type":"compare","net":"arr","i":3,"j":6}
-{"v":1,"type":"compare","net":"arr","i":4,"j":6}
-{"v":1,"type":"pin","net":"arr","name":"i","pos":3}
-{"v":1,"type":"swap","net":"arr","i":3,"j":4}
-{"v":1,"type":"compare","net":"arr","i":5,"j":6}
-{"v":1,"type":"swap","net":"arr","i":4,"j":6}
-{"v":1,"type":"pin","net":"arr","name":"pivot","pos":3}
-{"v":1,"type":"pin","net":"arr","name":"i","pos":0}
-{"v":1,"type":"compare","net":"arr","i":0,"j":3}
-{"v":1,"type":"compare","net":"arr","i":1,"j":3}
-{"v":1,"type":"compare","net":"arr","i":2,"j":3}
-{"v":1,"type":"swap","net":"arr","i":2,"j":3}
-{"v":1,"type":"done","net":"arr"}
+{"v": 1, "type": "init", "net": "arr", "values": [64, 34, 25, 12, 22, 11, 90]}
+{"v": 1, "type": "pin", "net": "arr", "name": "pivot", "pos": 6}
+{"v": 1, "type": "signal", "net": "arr", "name": "pivot_zone", "positions": [6]}
+{"v": 1, "type": "pin", "net": "arr", "name": "j", "pos": 0}
+{"v": 1, "type": "compare", "net": "arr", "i": 0, "j": 6}
+{"v": 1, "type": "swap", "net": "arr", "i": 0, "j": 0}
+{"v": 1, "type": "pin", "net": "arr", "name": "j", "pos": 1}
+{"v": 1, "type": "compare", "net": "arr", "i": 1, "j": 6}
+{"v": 1, "type": "swap", "net": "arr", "i": 1, "j": 1}
+{"v": 1, "type": "pin", "net": "arr", "name": "j", "pos": 2}
+{"v": 1, "type": "compare", "net": "arr", "i": 2, "j": 6}
+{"v": 1, "type": "swap", "net": "arr", "i": 2, "j": 2}
+{"v": 1, "type": "pin", "net": "arr", "name": "j", "pos": 3}
+{"v": 1, "type": "compare", "net": "arr", "i": 3, "j": 6}
+{"v": 1, "type": "swap", "net": "arr", "i": 3, "j": 3}
+{"v": 1, "type": "pin", "net": "arr", "name": "j", "pos": 4}
+{"v": 1, "type": "compare", "net": "arr", "i": 4, "j": 6}
+{"v": 1, "type": "swap", "net": "arr", "i": 4, "j": 4}
+{"v": 1, "type": "pin", "net": "arr", "name": "j", "pos": 5}
+{"v": 1, "type": "compare", "net": "arr", "i": 5, "j": 6}
+{"v": 1, "type": "swap", "net": "arr", "i": 5, "j": 5}
+{"v": 1, "type": "swap", "net": "arr", "i": 6, "j": 6}
+{"v": 1, "type": "pin", "net": "arr", "name": "pivot", "pos": 5}
+{"v": 1, "type": "signal", "net": "arr", "name": "pivot_zone", "positions": [5]}
+{"v": 1, "type": "pin", "net": "arr", "name": "j", "pos": 0}
+{"v": 1, "type": "compare", "net": "arr", "i": 0, "j": 5}
+{"v": 1, "type": "pin", "net": "arr", "name": "j", "pos": 1}
+{"v": 1, "type": "compare", "net": "arr", "i": 1, "j": 5}
+{"v": 1, "type": "pin", "net": "arr", "name": "j", "pos": 2}
+{"v": 1, "type": "compare", "net": "arr", "i": 2, "j": 5}
+{"v": 1, "type": "pin", "net": "arr", "name": "j", "pos": 3}
+{"v": 1, "type": "compare", "net": "arr", "i": 3, "j": 5}
+{"v": 1, "type": "pin", "net": "arr", "name": "j", "pos": 4}
+{"v": 1, "type": "compare", "net": "arr", "i": 4, "j": 5}
+{"v": 1, "type": "swap", "net": "arr", "i": 0, "j": 5}
+{"v": 1, "type": "pin", "net": "arr", "name": "pivot", "pos": 5}
+{"v": 1, "type": "signal", "net": "arr", "name": "pivot_zone", "positions": [5]}
+{"v": 1, "type": "pin", "net": "arr", "name": "j", "pos": 1}
+{"v": 1, "type": "compare", "net": "arr", "i": 1, "j": 5}
+{"v": 1, "type": "swap", "net": "arr", "i": 1, "j": 1}
+{"v": 1, "type": "pin", "net": "arr", "name": "j", "pos": 2}
+{"v": 1, "type": "compare", "net": "arr", "i": 2, "j": 5}
+{"v": 1, "type": "swap", "net": "arr", "i": 2, "j": 2}
+{"v": 1, "type": "pin", "net": "arr", "name": "j", "pos": 3}
+{"v": 1, "type": "compare", "net": "arr", "i": 3, "j": 5}
+{"v": 1, "type": "swap", "net": "arr", "i": 3, "j": 3}
+{"v": 1, "type": "pin", "net": "arr", "name": "j", "pos": 4}
+{"v": 1, "type": "compare", "net": "arr", "i": 4, "j": 5}
+{"v": 1, "type": "swap", "net": "arr", "i": 4, "j": 4}
+{"v": 1, "type": "swap", "net": "arr", "i": 5, "j": 5}
+{"v": 1, "type": "pin", "net": "arr", "name": "pivot", "pos": 4}
+{"v": 1, "type": "signal", "net": "arr", "name": "pivot_zone", "positions": [4]}
+{"v": 1, "type": "pin", "net": "arr", "name": "j", "pos": 1}
+{"v": 1, "type": "compare", "net": "arr", "i": 1, "j": 4}
+{"v": 1, "type": "pin", "net": "arr", "name": "j", "pos": 2}
+{"v": 1, "type": "compare", "net": "arr", "i": 2, "j": 4}
+{"v": 1, "type": "pin", "net": "arr", "name": "j", "pos": 3}
+{"v": 1, "type": "compare", "net": "arr", "i": 3, "j": 4}
+{"v": 1, "type": "swap", "net": "arr", "i": 1, "j": 3}
+{"v": 1, "type": "swap", "net": "arr", "i": 2, "j": 4}
+{"v": 1, "type": "pin", "net": "arr", "name": "pivot", "pos": 4}
+{"v": 1, "type": "signal", "net": "arr", "name": "pivot_zone", "positions": [4]}
+{"v": 1, "type": "pin", "net": "arr", "name": "j", "pos": 3}
+{"v": 1, "type": "compare", "net": "arr", "i": 3, "j": 4}
+{"v": 1, "type": "swap", "net": "arr", "i": 3, "j": 4}
+{"v": 1, "type": "done", "net": "arr"}

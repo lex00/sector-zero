@@ -216,6 +216,36 @@ class Probe
     puts JSON.generate({v:1,type:"done",net:net})
     $stdout.flush
   end
+  def access(net, pos)
+    puts JSON.generate({v:1,type:"access",net:net,pos:pos})
+    $stdout.flush
+  end
+  def found(net, pos)
+    puts JSON.generate({v:1,type:"found",net:net,pos:pos})
+    $stdout.flush
+  end
+  def not_found(net)
+    puts JSON.generate({v:1,type:"not_found",net:net})
+    $stdout.flush
+  end
+  def bounds(net, low, high)
+    puts JSON.generate({v:1,type:"bounds",net:net,low:low,high:high})
+    $stdout.flush
+  end
+  def split(net, left, mid, right)
+    puts JSON.generate({v:1,type:"split",net:net,left:left,mid:mid,right:right})
+    $stdout.flush
+  end
+  def merge(net, left, mid, right)
+    puts JSON.generate({v:1,type:"merge",net:net,left:left,mid:mid,right:right})
+    $stdout.flush
+  end
+  def write(net, pos, value)
+    s = @state[net] || []
+    s[pos] = value if pos >= 0 && pos < s.length
+    puts JSON.generate({v:1,type:"write",net:net,pos:pos,value:value})
+    $stdout.flush
+  end
 end
 `
 	if err := os.WriteFile(filepath.Join(dir, "probe.rb"), []byte(rubyProbe), 0o644); err != nil {
@@ -255,22 +285,46 @@ edition = "2021"
 struct Probe;
 impl Probe {
     fn new() -> Self { Probe }
+    fn emit(&self, s: &str) {
+        println!("{}", s);
+        io::stdout().flush().unwrap();
+    }
     fn init(&self, net: &str, values: &[i64]) {
         let s: Vec<String> = values.iter().map(|v| v.to_string()).collect();
-        println!(r#"{{"v":1,"type":"init","net":"{}","values":[{}]}}"#, net, s.join(","));
-        io::stdout().flush().unwrap();
+        self.emit(&format!(r#"{{"v":1,"type":"init","net":"{}","values":[{}]}}"#, net, s.join(",")));
     }
     fn compare(&self, net: &str, i: usize, j: usize) {
-        println!(r#"{{"v":1,"type":"compare","net":"{}","i":{},"j":{}}}"#, net, i, j);
-        io::stdout().flush().unwrap();
+        self.emit(&format!(r#"{{"v":1,"type":"compare","net":"{}","i":{},"j":{}}}"#, net, i, j));
     }
-    fn swap_vals(&self, net: &str, i: usize, j: usize) {
-        println!(r#"{{"v":1,"type":"swap","net":"{}","i":{},"j":{}}}"#, net, i, j);
-        io::stdout().flush().unwrap();
+    fn swap(&self, net: &str, i: usize, j: usize) {
+        self.emit(&format!(r#"{{"v":1,"type":"swap","net":"{}","i":{},"j":{}}}"#, net, i, j));
+    }
+    fn pin(&self, net: &str, name: &str, pos: usize) {
+        self.emit(&format!(r#"{{"v":1,"type":"pin","net":"{}","name":"{}","pos":{}}}"#, net, name, pos));
+    }
+    fn access(&self, net: &str, pos: usize) {
+        self.emit(&format!(r#"{{"v":1,"type":"access","net":"{}","pos":{}}}"#, net, pos));
+    }
+    fn found(&self, net: &str, pos: usize) {
+        self.emit(&format!(r#"{{"v":1,"type":"found","net":"{}","pos":{}}}"#, net, pos));
+    }
+    fn not_found(&self, net: &str) {
+        self.emit(&format!(r#"{{"v":1,"type":"not_found","net":"{}"}}"#, net));
+    }
+    fn bounds(&self, net: &str, low: usize, high: usize) {
+        self.emit(&format!(r#"{{"v":1,"type":"bounds","net":"{}","low":{},"high":{}}}"#, net, low, high));
+    }
+    fn split(&self, net: &str, left: usize, mid: usize, right: usize) {
+        self.emit(&format!(r#"{{"v":1,"type":"split","net":"{}","left":{},"mid":{},"right":{}}}"#, net, left, mid, right));
+    }
+    fn merge(&self, net: &str, left: usize, mid: usize, right: usize) {
+        self.emit(&format!(r#"{{"v":1,"type":"merge","net":"{}","left":{},"mid":{},"right":{}}}"#, net, left, mid, right));
+    }
+    fn write(&self, net: &str, pos: usize, value: i64) {
+        self.emit(&format!(r#"{{"v":1,"type":"write","net":"{}","pos":{},"value":{}}}"#, net, pos, value));
     }
     fn done(&self, net: &str) {
-        println!(r#"{{"v":1,"type":"done","net":"{}"}}"#, net);
-        io::stdout().flush().unwrap();
+        self.emit(&format!(r#"{{"v":1,"type":"done","net":"{}"}}"#, net));
     }
 }
 `
@@ -292,10 +346,8 @@ impl Probe {
 
 func runJava(ctx context.Context, dir, code string) ([]byte, error) {
 	// Write a minimal Java probe.
-	javaProbe := `import java.io.*;
-
-public class Probe {
-    public void init(String net, int[] values) throws IOException {
+	javaProbe := `public class Probe {
+    public void init(String net, int[] values) {
         StringBuilder sb = new StringBuilder("[");
         for (int i = 0; i < values.length; i++) {
             if (i > 0) sb.append(",");
@@ -311,6 +363,39 @@ public class Probe {
     }
     public void swap(String net, int i, int j) {
         System.out.println("{\"v\":1,\"type\":\"swap\",\"net\":\"" + net + "\",\"i\":" + i + ",\"j\":" + j + "}");
+        System.out.flush();
+    }
+    public void pin(String net, String name, int pos) {
+        System.out.println("{\"v\":1,\"type\":\"pin\",\"net\":\"" + net + "\",\"name\":\"" + name + "\",\"pos\":" + pos + "}");
+        System.out.flush();
+    }
+    public void access(String net, int pos) {
+        System.out.println("{\"v\":1,\"type\":\"access\",\"net\":\"" + net + "\",\"pos\":" + pos + "}");
+        System.out.flush();
+    }
+    public void found(String net, int pos) {
+        System.out.println("{\"v\":1,\"type\":\"found\",\"net\":\"" + net + "\",\"pos\":" + pos + "}");
+        System.out.flush();
+    }
+    public void notFound(String net) {
+        System.out.println("{\"v\":1,\"type\":\"not_found\",\"net\":\"" + net + "\"}");
+        System.out.flush();
+    }
+    public void not_found(String net) { notFound(net); }
+    public void bounds(String net, int low, int high) {
+        System.out.println("{\"v\":1,\"type\":\"bounds\",\"net\":\"" + net + "\",\"low\":" + low + ",\"high\":" + high + "}");
+        System.out.flush();
+    }
+    public void split(String net, int left, int mid, int right) {
+        System.out.println("{\"v\":1,\"type\":\"split\",\"net\":\"" + net + "\",\"left\":" + left + ",\"mid\":" + mid + ",\"right\":" + right + "}");
+        System.out.flush();
+    }
+    public void merge(String net, int left, int mid, int right) {
+        System.out.println("{\"v\":1,\"type\":\"merge\",\"net\":\"" + net + "\",\"left\":" + left + ",\"mid\":" + mid + ",\"right\":" + right + "}");
+        System.out.flush();
+    }
+    public void write(String net, int pos, int value) {
+        System.out.println("{\"v\":1,\"type\":\"write\",\"net\":\"" + net + "\",\"pos\":" + pos + ",\"value\":" + value + "}");
         System.out.flush();
     }
     public void done(String net) {

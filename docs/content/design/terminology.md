@@ -47,7 +47,7 @@ The artifact's behavior is made legible one Pulse at a time. The Scope advances 
 
 **In-world meaning:** The equipment you use to interface with the artifact — or rather, to make *your* implementation emit a signal in the same format as the artifact's. A Probe is a small library (one file, no dependencies) that you import into your solution. You call its methods as your algorithm executes. The Probe writes a Trace to stdout in the artifact's signal format.
 
-There is a Probe for each supported language. The Probe API is identical across languages: `init`, `compare`, `swap`, `pin`, `signal`, `access`, `found`, `not_found`, `bounds`, `split`, `merge`, `done`.
+There is a Probe for each supported language. The Probe API is identical across languages: `init`, `compare`, `swap`, `pin`, `signal`, `access`, `found`, `not_found`, `bounds`, `split`, `merge`, `write`, `done`.
 
 ---
 

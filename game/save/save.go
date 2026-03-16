@@ -9,6 +9,7 @@ import (
 
 // Save holds persistent game state written to ~/.sector-zero/save.json.
 type Save struct {
+	Version        int     `json:"version"`
 	HelpLevel      string  `json:"help_level"`      // "BLACKOUT"|"STATIC"|"SIGNAL"|"OPEN"
 	CurrentPuzzle  int     `json:"current_puzzle"`
 	Completed      []int   `json:"completed"`
@@ -35,7 +36,8 @@ func savePath() (string, error) {
 // Default returns a fresh Save with sensible starting values.
 func Default() Save {
 	return Save{
-		HelpLevel:      "SIGNAL",
+		Version:        1,
+		HelpLevel:      "OPEN",
 		CurrentPuzzle:  1,
 		Completed:      []int{},
 		FusesRemaining: 3,
@@ -62,6 +64,11 @@ func Load() (Save, error) {
 	var s Save
 	if err := json.Unmarshal(data, &s); err != nil {
 		return Default(), err
+	}
+	// Migrate pre-v1 saves: force OPEN level so new players get useful hints.
+	if s.Version < 1 {
+		s.HelpLevel = "OPEN"
+		s.Version = 1
 	}
 	return s, nil
 }

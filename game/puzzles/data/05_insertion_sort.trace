@@ -4,6 +4,8 @@
 {"v":1,"type":"swap","net":"arr","i":1,"j":0}
 {"v":1,"type":"pin","net":"arr","name":"i","pos":2}
 {"v":1,"type":"compare","net":"arr","i":2,"j":1}
+{"v":1,"type":"swap","net":"arr","i":2,"j":1}
+{"v":1,"type":"compare","net":"arr","i":1,"j":0}
 {"v":1,"type":"pin","net":"arr","name":"i","pos":3}
 {"v":1,"type":"compare","net":"arr","i":3,"j":2}
 {"v":1,"type":"pin","net":"arr","name":"i","pos":4}
@@ -20,4 +22,7 @@
 {"v":1,"type":"swap","net":"arr","i":5,"j":4}
 {"v":1,"type":"compare","net":"arr","i":4,"j":3}
 {"v":1,"type":"swap","net":"arr","i":4,"j":3}
+{"v":1,"type":"compare","net":"arr","i":3,"j":2}
+{"v":1,"type":"swap","net":"arr","i":3,"j":2}
+{"v":1,"type":"compare","net":"arr","i":2,"j":1}
 {"v":1,"type":"done","net":"arr"}

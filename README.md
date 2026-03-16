@@ -170,6 +170,7 @@ public class Solution {
 | `bounds(net, low, high)` | Signal the current search window |
 | `split(net, left, mid, right)` | Signal a divide step |
 | `merge(net, left, mid, right)` | Signal a merge step |
+| `write(net, pos, value)` | Write a value to a single position (mutates state) |
 | `done(net)` | Signal completion of all operations |
 
 ---
@@ -182,8 +183,8 @@ Sector Zero lets you tune how much the game reveals. Change your help level in t
 |-------|-------------|
 | `BLACKOUT` | Reference Trace plays once at full speed. No labels. No replay. You're on your own. |
 | `STATIC` | Reference Trace available on demand, but no pin labels or signal annotations in the hint view. |
-| `SIGNAL` | Full pin labels and signal annotations visible in the reference Trace. *(Default)* |
-| `OPEN` | Full annotations, pause/step controls on reference Trace, heat-free hint mode. |
+| `SIGNAL` | Full pin labels and signal annotations visible in the reference Trace. |
+| `OPEN` | Full annotations, pause/step controls on reference Trace, heat-free hint mode. *(Default)* |
 
 These are named after diagnostic instrument settings, not difficulty tiers. Increasing the level gives you more signal, not a simpler problem.
 

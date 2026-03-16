@@ -14,10 +14,10 @@ run: build
 
 traces:
 	@echo "Generating puzzle trace files..."
-	cd ref && python3 bubble_sort.py > ../game/puzzles/data/bubble_sort.trace
-	cd ref && python3 binary_search.py > ../game/puzzles/data/binary_search.trace
-	cd ref && python3 merge_sort.py > ../game/puzzles/data/merge_sort.trace
-	cd ref && python3 quick_sort.py > ../game/puzzles/data/quick_sort.trace
+	cd ref && PYTHONPATH=../probes/python python3 bubble_sort.py > ../game/puzzles/data/01_bubble_sort.trace
+	cd ref && PYTHONPATH=../probes/python python3 binary_search.py > ../game/puzzles/data/03_binary_search.trace
+	cd ref && PYTHONPATH=../probes/python python3 merge_sort.py > ../game/puzzles/data/06_merge_sort.trace
+	cd ref && PYTHONPATH=../probes/python python3 quick_sort.py > ../game/puzzles/data/07_quick_sort.trace
 	@echo "Done."
 
 tidy:

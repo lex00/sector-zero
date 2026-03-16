@@ -66,6 +66,13 @@ class Probe:
         """Signal that two subarrays are being merged into [left, right)."""
         self._emit({"type": "merge", "net": net, "left": left, "mid": mid, "right": right})
 
+    def write(self, net, pos, value):
+        """Update a single element at pos and emit a write pulse."""
+        arr = self._state.get(net)
+        if arr is not None and 0 <= pos < len(arr):
+            arr[pos] = value
+        self._emit({"type": "write", "net": net, "pos": pos, "value": value})
+
     def done(self, net):
         """Signal that all operations on this net are complete."""
         self._emit({"type": "done", "net": net})

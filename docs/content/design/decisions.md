@@ -61,8 +61,8 @@ The Braille rendering requires a terminal and font that support Unicode, which i
 
 - **BLACKOUT**: No hints of any kind. The reference Trace plays once at full speed and you are on your own. For players who want the full alien-artifact experience.
 - **STATIC**: The Scope shows the reference Trace on demand, but no structural hints (no pin labels in the hint view, no annotated regions).
-- **SIGNAL**: Pin labels are visible in the reference Trace. Signals are labeled. You can see *what* is being tracked, even if you don't know *why*. This is the default.
-- **OPEN**: Full annotations, pause/step controls on the reference Trace, and a heat-free hint mode. For players who are genuinely stuck or using the game in a learning context.
+- **SIGNAL**: Pin labels are visible in the reference Trace. Signals are labeled. You can see *what* is being tracked, even if you don't know *why*.
+- **OPEN**: Full annotations, pause/step controls on the reference Trace, and a heat-free hint mode. For players who are genuinely stuck or using the game in a learning context. This is the default.
 
 The help level is a game setting, not a puzzle property. Players can change it at any time. Lowering the help level mid-puzzle awards no bonus — it is simply a tool for the player's own use.
 
@@ -100,7 +100,7 @@ The practical implication: if a puzzle is based on a specific variant of an algo
 
 ## 7. Multi-Language Support
 
-**Decision:** The Probe library is available in multiple languages, with Python shipping first and Go/TypeScript to follow.
+**Decision:** The Probe library is available in multiple languages: Python, Go, JavaScript, Ruby, Rust, and Java.
 
 **Why:** The game is for developers, and developers have a primary language. Forcing every player to write Python creates a friction that has nothing to do with algorithmic understanding — it is just a language tax. A player who thinks in Go should be able to think in Go. A player who teaches JavaScript should be able to demo the game in JavaScript.
 

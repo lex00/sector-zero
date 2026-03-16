@@ -247,6 +247,25 @@ Signals that two adjacent subarrays are being merged into `[left, right)`. The t
 
 ---
 
+### `write`
+
+Writes a value to a single position on a Net. Mutates the Net's logical state: after a `write` pulse, position `pos` holds `value`. Used by algorithms that write to a scratch or output array directly (e.g. merge sort's merge step).
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `v` | integer | yes | Protocol version. |
+| `type` | string | yes | Always `"write"`. |
+| `net` | string | yes | The Net being written to. |
+| `pos` | integer | yes | The position being written. |
+| `value` | number | yes | The value being written to that position. |
+
+**Example:**
+```json
+{"v":1,"type":"write","net":"arr","pos":2,"value":7}
+```
+
+---
+
 ### `done`
 
 Signals that all operations on a Net are complete. The final state of the Net after all preceding `swap` events is the algorithm's output. Every Trace must end with a `done` pulse for each Net that was initialized.

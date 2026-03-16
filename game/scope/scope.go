@@ -29,6 +29,7 @@ type Pulse struct {
 	Mid       int    `json:"mid,omitempty"`
 	Left      int    `json:"left,omitempty"`
 	Right     int    `json:"right,omitempty"`
+	Value     int    `json:"value,omitempty"`
 }
 
 // ParseTrace parses an NDJSON trace file into a slice of Pulses.
@@ -37,12 +38,12 @@ func ParseTrace(data []byte) ([]Pulse, error) {
 	scanner := bufio.NewScanner(bytes.NewReader(data))
 	for scanner.Scan() {
 		line := bytes.TrimSpace(scanner.Bytes())
-		if len(line) == 0 {
+		if len(line) == 0 || line[0] != '{' {
 			continue
 		}
 		var p Pulse
 		if err := json.Unmarshal(line, &p); err != nil {
-			return nil, fmt.Errorf("parse pulse: %w", err)
+			continue
 		}
 		pulses = append(pulses, p)
 	}
@@ -77,6 +78,8 @@ type Model struct {
 
 	HeatCorrupt  float64 // 0-1, causes border corruption
 	BrailleNoise float64 // noise bleeds in at hot stage
+
+	LoopCount int // incremented each time the trace restarts from the beginning
 }
 
 // New returns an initialised scope Model.
@@ -119,7 +122,17 @@ func (m Model) Init() (Model, tea.Cmd) {
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case TickMsg:
-		if !m.Paused && m.CurrentPulse < len(m.Trace) {
+		if !m.Paused && len(m.Trace) > 0 {
+			if m.CurrentPulse >= len(m.Trace) {
+				// Loop: clear state, restart, and count the loop.
+				m.CurrentPulse = 0
+				m.LoopCount++
+				m.netState = make(map[string]*NetState)
+				m.pins = make(map[string]map[string]int)
+				m.signals = make(map[string]map[string][]int)
+				m.bounds = make(map[string][2]int)
+				m.accesses = make(map[string]int)
+			}
 			m.applyPulse(m.Trace[m.CurrentPulse])
 			m.CurrentPulse++
 		}
@@ -145,12 +158,11 @@ func (m *Model) applyPulse(p Pulse) {
 		delete(m.signals, net)
 
 	case "compare":
-		if ns, ok := m.netState[net]; ok {
-			_ = ns
-		}
 		if m.signals[net] == nil {
 			m.signals[net] = make(map[string][]int)
 		}
+		// Clear any lingering swap highlight, set compare.
+		delete(m.signals[net], "swap")
 		m.signals[net]["compare"] = []int{p.I, p.J}
 
 	case "swap":
@@ -160,10 +172,12 @@ func (m *Model) applyPulse(p Pulse) {
 				ns.Normalised = normalise(ns.Values)
 			}
 		}
-		// Clear compare highlight after swap.
-		if m.signals[net] != nil {
-			delete(m.signals[net], "compare")
+		if m.signals[net] == nil {
+			m.signals[net] = make(map[string][]int)
 		}
+		// Replace compare highlight with swap highlight so bars show orange for one tick.
+		delete(m.signals[net], "compare")
+		m.signals[net]["swap"] = []int{p.I, p.J}
 
 	case "pin":
 		if m.pins[net] == nil {
@@ -201,6 +215,15 @@ func (m *Model) applyPulse(p Pulse) {
 		m.signals[net]["left"] = []int{p.Left}
 		m.signals[net]["mid"] = []int{p.Mid}
 		m.signals[net]["right"] = []int{p.Right}
+
+	case "write":
+		if ns, ok := m.netState[net]; ok {
+			if p.Pos >= 0 && p.Pos < len(ns.Values) {
+				ns.Values[p.Pos] = p.Value
+				ns.Normalised = normalise(ns.Values)
+			}
+		}
+		m.accesses[net] = p.Pos
 
 	case "done":
 		if m.signals[net] != nil {
@@ -253,7 +276,13 @@ func (m Model) View() string {
 				}
 			}
 		}
-		brailleRows = RenderBars(ns.Normalised, highlights, innerW, innerH-2)
+		// Access pulse: lower priority than compare/swap/found — only set if not already highlighted.
+		if pos, ok := m.accesses[netName]; ok {
+			if _, exists := highlights[pos]; !exists {
+				highlights[pos] = "access"
+			}
+		}
+		brailleRows = RenderBars(ns.Normalised, ns.Values, highlights, innerW, innerH-2)
 	} else {
 		// Empty state - show blank braille.
 		brailleRows = make([]string, innerH-2)
@@ -366,20 +395,34 @@ func normalise(values []int) []float64 {
 }
 
 // addNoise randomly replaces some braille cells with noise characters.
+// It skips ANSI escape sequences so it doesn't corrupt color codes.
 func addNoise(rows []string, level float64) []string {
 	noisy := make([]string, len(rows))
 	for i, row := range rows {
 		runes := []rune(row)
-		for j, ch := range runes {
+		out := make([]rune, 0, len(runes))
+		inEscape := false
+		for _, ch := range runes {
+			if ch == 0x1B { // ESC — start of ANSI sequence
+				inEscape = true
+				out = append(out, ch)
+				continue
+			}
+			if inEscape {
+				out = append(out, ch)
+				if ch == 'm' {
+					inEscape = false
+				}
+				continue
+			}
 			if rand.Float64() < level*0.15 {
-				// Replace with a random braille char.
 				mask := byte(rand.Intn(256))
-				runes[j] = brailleChar(mask)
+				out = append(out, brailleChar(mask))
 			} else {
-				runes[j] = ch
+				out = append(out, ch)
 			}
 		}
-		noisy[i] = string(runes)
+		noisy[i] = string(out)
 	}
 	return noisy
 }

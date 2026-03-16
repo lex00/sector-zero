@@ -18,5 +18,13 @@ class Probe {
   notFound(net) { console.log(JSON.stringify({v:1,type:"not_found",net})); }
   bounds(net, low, high) { console.log(JSON.stringify({v:1,type:"bounds",net,low,high})); }
   done(net) { console.log(JSON.stringify({v:1,type:"done",net})); }
+  split(net, left, mid, right) { console.log(JSON.stringify({v:1,type:"split",net,left,mid,right})); }
+  merge(net, left, mid, right) { console.log(JSON.stringify({v:1,type:"merge",net,left,mid,right})); }
+  write(net, pos, value) {
+    const s = this._state[net] || [];
+    if (pos >= 0 && pos < s.length) s[pos] = value;
+    console.log(JSON.stringify({v:1,type:"write",net,pos,value}));
+  }
+  not_found(net) { this.notFound(net); }
 }
 module.exports = { Probe };

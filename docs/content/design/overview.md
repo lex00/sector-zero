@@ -37,7 +37,7 @@ Probe  →  Trace  →  Scope
 
 ### Layer 1: Probe (Player Interface)
 
-The Probe is a small library available in the player's language of choice — currently Python, with Go and TypeScript planned. The player writes an algorithm using the Probe API: calling `init`, `compare`, `swap`, `pin`, `signal`, and related methods as their code runs. The Probe emits a stream of structured events to stdout.
+The Probe is a small library available in the player's language of choice — Python, Go, JavaScript, Ruby, Rust, and Java. The player writes an algorithm using the Probe API: calling `init`, `compare`, `swap`, `pin`, `signal`, and related methods as their code runs. The Probe emits a stream of structured events to stdout.
 
 The Probe API is intentionally minimal. It does not enforce any particular algorithm. It does not know what puzzle you are solving. It simply instruments your code and produces a signal.
 

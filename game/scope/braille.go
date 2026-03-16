@@ -1,7 +1,10 @@
 package scope
 
 import (
+	"strconv"
 	"strings"
+
+	"github.com/charmbracelet/lipgloss"
 )
 
 // Braille unicode block starts at U+2800.
@@ -27,14 +30,39 @@ func brailleChar(mask byte) rune {
 	return rune(brailleBase + int(mask))
 }
 
-// RenderBars renders a bar chart as braille characters.
+// tagColor maps a highlight tag to a terminal color.
+func tagColor(tag string) lipgloss.Color {
+	switch tag {
+	case "compare":
+		return lipgloss.Color("11") // yellow — inspecting
+	case "swap":
+		return lipgloss.Color("208") // orange — moving
+	case "pivot":
+		return lipgloss.Color("13") // magenta — pivot marker
+	case "found":
+		return lipgloss.Color("10") // green — match
+	case "access":
+		return lipgloss.Color("14") // cyan — read
+	case "left", "right", "split":
+		return lipgloss.Color("12") // blue — partition boundary
+	case "mid", "merge":
+		return lipgloss.Color("13") // magenta — midpoint / merge marker
+	case "write":
+		return lipgloss.Color("14") // cyan — value being written back
+	default:
+		return lipgloss.Color("") // no override
+	}
+}
+
+// RenderBars renders a bar chart as braille characters with per-tag coloring.
 //
 // values: normalised bar heights in [0.0, 1.0].
+// labels: raw integer values shown as text in the bottom row (nil = no labels).
 // highlights: index → highlight tag ("compare", "swap", "pivot", "found", "access").
 // width, height: panel size in terminal character cells.
 //
-// Returns a slice of strings, one per terminal row.
-func RenderBars(values []float64, highlights map[int]string, width, height int) []string {
+// Returns a slice of strings (with embedded ANSI color), one per terminal row.
+func RenderBars(values []float64, labels []int, highlights map[int]string, width, height int) []string {
 	if len(values) == 0 || width <= 0 || height <= 0 {
 		empty := make([]string, height)
 		for i := range empty {
@@ -76,7 +104,7 @@ func RenderBars(values []float64, highlights map[int]string, width, height int) 
 		}
 	}
 
-	// Render grid into braille characters.
+	// Render grid into braille characters (plain, no color yet).
 	rows := make([]string, height)
 	for cellRow := 0; cellRow < height; cellRow++ {
 		var sb strings.Builder
@@ -96,16 +124,50 @@ func RenderBars(values []float64, highlights map[int]string, width, height int) 
 		rows[cellRow] = sb.String()
 	}
 
-	// Overlay highlight caps on top of highlighted bars.
+	// Overlay integer labels on the bottom row (plain text, before ANSI coloring).
+	if len(labels) == len(values) && height > 0 {
+		labelRunes := make([]rune, width)
+		for i := range labelRunes {
+			labelRunes[i] = ' '
+		}
+		for idx, v := range labels {
+			startCell := (idx * barWidth) / 2
+			endCell := ((idx + 1) * barWidth) / 2
+			cellW := endCell - startCell
+			if cellW <= 0 || startCell >= width {
+				continue
+			}
+			s := strconv.Itoa(v)
+			if len(s) > cellW {
+				continue
+			}
+			col := startCell + (cellW-len(s))/2
+			for j, ch := range s {
+				if col+j < width {
+					labelRunes[col+j] = ch
+				}
+			}
+		}
+		rows[height-1] = string(labelRunes)
+	}
+
+	// Build a per-cell-column color map from highlights.
+	// Also mark the top cap of each highlighted bar with a full braille char.
+	cellColor := make(map[int]lipgloss.Color)
 	if highlights != nil {
 		for idx, tag := range highlights {
 			if idx < 0 || idx >= len(values) {
 				continue
 			}
-			_ = tag
-			// Mark the top cell of the highlighted bar with a dense braille char.
-			// Find the topmost filled dot row for this bar.
+			color := tagColor(tag)
 			barDotColStart := idx * barWidth
+			startCell := barDotColStart / 2
+			endCell := (barDotColStart + barWidth) / 2
+			for c := startCell; c < endCell && c < width; c++ {
+				cellColor[c] = color
+			}
+
+			// Replace the top cell of the bar with a full-dot cap.
 			v := values[idx]
 			if v < 0 {
 				v = 0
@@ -121,13 +183,46 @@ func RenderBars(values []float64, highlights map[int]string, width, height int) 
 			topCellRow := topDotRow / 4
 			cellCol := barDotColStart / 2
 			if topCellRow >= 0 && topCellRow < height && cellCol >= 0 && cellCol < width {
-				// Replace that cell with a full braille char (all dots on).
 				runes := []rune(rows[topCellRow])
 				if cellCol < len(runes) {
 					runes[cellCol] = brailleChar(0xFF)
 					rows[topCellRow] = string(runes)
 				}
 			}
+		}
+	}
+
+	// Apply color to each row by grouping consecutive same-colored cells.
+	if len(cellColor) > 0 {
+		for r, row := range rows {
+			runes := []rune(row)
+			var out strings.Builder
+			var group strings.Builder
+			var lastColor lipgloss.Color
+
+			flush := func() {
+				if group.Len() == 0 {
+					return
+				}
+				seg := group.String()
+				group.Reset()
+				if lastColor != "" {
+					out.WriteString(lipgloss.NewStyle().Foreground(lastColor).Render(seg))
+				} else {
+					out.WriteString(seg)
+				}
+			}
+
+			for cellCol, ch := range runes {
+				c := cellColor[cellCol] // "" if not highlighted
+				if c != lastColor {
+					flush()
+					lastColor = c
+				}
+				group.WriteRune(ch)
+			}
+			flush()
+			rows[r] = out.String()
 		}
 	}
 
@@ -166,5 +261,5 @@ func RenderBinary(low, high, mid, target, size, width, height int) []string {
 		highlights[target] = "found"
 	}
 
-	return RenderBars(values, highlights, width, height)
+	return RenderBars(values, nil, highlights, width, height)
 }

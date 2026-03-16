@@ -12,8 +12,37 @@ type Result struct {
 	HintKey  string // key for dialogue lookup
 }
 
+// algorithmicTypes are the pulse types that represent actual algorithmic
+// operations. Decorative/visualisation pulses (pin, signal, bounds) are
+// excluded so that templates which omit them can still score exact.
+var algorithmicTypes = map[string]bool{
+	"init":      true,
+	"compare":   true,
+	"swap":      true,
+	"access":    true,
+	"found":     true,
+	"not_found": true,
+	"done":      true,
+	"split":     true,
+	"merge":     true,
+}
+
+func filterAlgorithmic(pulses []scope.Pulse) []scope.Pulse {
+	out := make([]scope.Pulse, 0, len(pulses))
+	for _, p := range pulses {
+		if algorithmicTypes[p.Type] {
+			out = append(out, p)
+		}
+	}
+	return out
+}
+
 // Diff compares a player trace to the target trace and returns a Result.
 func Diff(player []scope.Pulse, target []scope.Pulse) Result {
+	// Strip decorative pulses before scoring.
+	player = filterAlgorithmic(player)
+	target = filterAlgorithmic(target)
+
 	if len(player) == 0 {
 		return Result{
 			Score:     0,

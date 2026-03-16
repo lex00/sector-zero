@@ -16,7 +16,7 @@
       "enum": [
         "init", "compare", "swap", "pin", "signal",
         "access", "found", "not_found", "bounds",
-        "split", "merge", "done"
+        "split", "merge", "write", "done"
       ],
       "description": "The pulse type, used as the oneOf discriminator."
     },
@@ -244,6 +244,26 @@
         }
       },
       "required": ["v", "type", "net", "left", "mid", "right"],
+      "additionalProperties": false
+    },
+    {
+      "title": "write",
+      "description": "Writes a value to a single position. Mutates the Net's logical state.",
+      "properties": {
+        "v":    { "type": "integer", "const": 1 },
+        "type": { "type": "string", "const": "write" },
+        "net":  { "type": "string", "minLength": 1 },
+        "pos": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The zero-based position being written."
+        },
+        "value": {
+          "type": "number",
+          "description": "The value being written to that position."
+        }
+      },
+      "required": ["v", "type", "net", "pos", "value"],
       "additionalProperties": false
     },
     {

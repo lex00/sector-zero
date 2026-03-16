@@ -29,7 +29,7 @@ def merge(arr, left, mid, right):
     tmp.extend(arr[j:right])
     for k, v in enumerate(tmp):
         arr[left + k] = v
-        p.pin("arr", "write", left + k)
+        p.write("arr", left + k, v)
 
 def run():
     arr = [64, 34, 25, 12, 22, 11, 90]

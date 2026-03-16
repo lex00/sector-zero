@@ -1,29 +1,48 @@
-{"v":1,"type":"init","net":"arr","values":[38,27,43,3,9,82,10]}
-{"v":1,"type":"split","net":"arr","left":0,"mid":3,"right":7}
-{"v":1,"type":"split","net":"arr","left":0,"mid":1,"right":3}
-{"v":1,"type":"split","net":"arr","left":0,"mid":0,"right":1}
-{"v":1,"type":"merge","net":"arr","left":0,"mid":0,"right":1}
-{"v":1,"type":"compare","net":"arr","i":0,"j":1}
-{"v":1,"type":"split","net":"arr","left":1,"mid":2,"right":3}
-{"v":1,"type":"merge","net":"arr","left":1,"mid":2,"right":3}
-{"v":1,"type":"compare","net":"arr","i":1,"j":2}
-{"v":1,"type":"swap","net":"arr","i":1,"j":2}
-{"v":1,"type":"merge","net":"arr","left":0,"mid":1,"right":3}
-{"v":1,"type":"compare","net":"arr","i":0,"j":1}
-{"v":1,"type":"compare","net":"arr","i":0,"j":2}
-{"v":1,"type":"split","net":"arr","left":3,"mid":5,"right":7}
-{"v":1,"type":"split","net":"arr","left":3,"mid":4,"right":5}
-{"v":1,"type":"merge","net":"arr","left":3,"mid":4,"right":5}
-{"v":1,"type":"compare","net":"arr","i":3,"j":4}
-{"v":1,"type":"swap","net":"arr","i":3,"j":4}
-{"v":1,"type":"split","net":"arr","left":5,"mid":6,"right":7}
-{"v":1,"type":"merge","net":"arr","left":5,"mid":6,"right":7}
-{"v":1,"type":"compare","net":"arr","i":5,"j":6}
-{"v":1,"type":"swap","net":"arr","i":5,"j":6}
-{"v":1,"type":"merge","net":"arr","left":3,"mid":5,"right":7}
-{"v":1,"type":"compare","net":"arr","i":3,"j":5}
-{"v":1,"type":"compare","net":"arr","i":3,"j":6}
-{"v":1,"type":"merge","net":"arr","left":0,"mid":3,"right":7}
-{"v":1,"type":"compare","net":"arr","i":0,"j":3}
-{"v":1,"type":"compare","net":"arr","i":1,"j":3}
-{"v":1,"type":"done","net":"arr"}
+{"v": 1, "type": "init", "net": "arr", "values": [64, 34, 25, 12, 22, 11, 90]}
+{"v": 1, "type": "split", "net": "arr", "left": 0, "mid": 3, "right": 7}
+{"v": 1, "type": "split", "net": "arr", "left": 0, "mid": 1, "right": 3}
+{"v": 1, "type": "split", "net": "arr", "left": 1, "mid": 2, "right": 3}
+{"v": 1, "type": "merge", "net": "arr", "left": 1, "mid": 2, "right": 3}
+{"v": 1, "type": "compare", "net": "arr", "i": 1, "j": 2}
+{"v": 1, "type": "write", "net": "arr", "pos": 1, "value": 25}
+{"v": 1, "type": "write", "net": "arr", "pos": 2, "value": 34}
+{"v": 1, "type": "merge", "net": "arr", "left": 0, "mid": 1, "right": 3}
+{"v": 1, "type": "compare", "net": "arr", "i": 0, "j": 1}
+{"v": 1, "type": "compare", "net": "arr", "i": 0, "j": 2}
+{"v": 1, "type": "write", "net": "arr", "pos": 0, "value": 25}
+{"v": 1, "type": "write", "net": "arr", "pos": 1, "value": 34}
+{"v": 1, "type": "write", "net": "arr", "pos": 2, "value": 64}
+{"v": 1, "type": "split", "net": "arr", "left": 3, "mid": 5, "right": 7}
+{"v": 1, "type": "split", "net": "arr", "left": 3, "mid": 4, "right": 5}
+{"v": 1, "type": "merge", "net": "arr", "left": 3, "mid": 4, "right": 5}
+{"v": 1, "type": "compare", "net": "arr", "i": 3, "j": 4}
+{"v": 1, "type": "write", "net": "arr", "pos": 3, "value": 12}
+{"v": 1, "type": "write", "net": "arr", "pos": 4, "value": 22}
+{"v": 1, "type": "split", "net": "arr", "left": 5, "mid": 6, "right": 7}
+{"v": 1, "type": "merge", "net": "arr", "left": 5, "mid": 6, "right": 7}
+{"v": 1, "type": "compare", "net": "arr", "i": 5, "j": 6}
+{"v": 1, "type": "write", "net": "arr", "pos": 5, "value": 11}
+{"v": 1, "type": "write", "net": "arr", "pos": 6, "value": 90}
+{"v": 1, "type": "merge", "net": "arr", "left": 3, "mid": 5, "right": 7}
+{"v": 1, "type": "compare", "net": "arr", "i": 3, "j": 5}
+{"v": 1, "type": "compare", "net": "arr", "i": 3, "j": 6}
+{"v": 1, "type": "compare", "net": "arr", "i": 4, "j": 6}
+{"v": 1, "type": "write", "net": "arr", "pos": 3, "value": 11}
+{"v": 1, "type": "write", "net": "arr", "pos": 4, "value": 12}
+{"v": 1, "type": "write", "net": "arr", "pos": 5, "value": 22}
+{"v": 1, "type": "write", "net": "arr", "pos": 6, "value": 90}
+{"v": 1, "type": "merge", "net": "arr", "left": 0, "mid": 3, "right": 7}
+{"v": 1, "type": "compare", "net": "arr", "i": 0, "j": 3}
+{"v": 1, "type": "compare", "net": "arr", "i": 0, "j": 4}
+{"v": 1, "type": "compare", "net": "arr", "i": 0, "j": 5}
+{"v": 1, "type": "compare", "net": "arr", "i": 0, "j": 6}
+{"v": 1, "type": "compare", "net": "arr", "i": 1, "j": 6}
+{"v": 1, "type": "compare", "net": "arr", "i": 2, "j": 6}
+{"v": 1, "type": "write", "net": "arr", "pos": 0, "value": 11}
+{"v": 1, "type": "write", "net": "arr", "pos": 1, "value": 12}
+{"v": 1, "type": "write", "net": "arr", "pos": 2, "value": 22}
+{"v": 1, "type": "write", "net": "arr", "pos": 3, "value": 25}
+{"v": 1, "type": "write", "net": "arr", "pos": 4, "value": 34}
+{"v": 1, "type": "write", "net": "arr", "pos": 5, "value": 64}
+{"v": 1, "type": "write", "net": "arr", "pos": 6, "value": 90}
+{"v": 1, "type": "done", "net": "arr"}

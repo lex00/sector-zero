@@ -36,5 +36,17 @@ class Probe:
     def bounds(self, net, low, high):
         print(json.dumps({"v":1,"type":"bounds","net":net,"low":low,"high":high}), flush=True)
 
+    def split(self, net, left, mid, right):
+        print(json.dumps({"v":1,"type":"split","net":net,"left":left,"mid":mid,"right":right}), flush=True)
+
+    def merge(self, net, left, mid, right):
+        print(json.dumps({"v":1,"type":"merge","net":net,"left":left,"mid":mid,"right":right}), flush=True)
+
+    def write(self, net, pos, value):
+        s = self._state.get(net, [])
+        if 0 <= pos < len(s):
+            s[pos] = value
+        print(json.dumps({"v":1,"type":"write","net":net,"pos":pos,"value":value}), flush=True)
+
     def done(self, net):
         print(json.dumps({"v":1,"type":"done","net":net}), flush=True)
