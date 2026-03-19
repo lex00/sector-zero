@@ -13,7 +13,9 @@ Sector Zero is a gamified algorithm puzzle game that runs entirely in your termi
 
 The artifact does not respond to conventional interfaces. It speaks in a signal language of its own: pulses of activity across named internal channels, patterns that repeat with eerie consistency. Your job is to study those patterns and reproduce them — not to name them, not to understand them in any academic sense, but to *match* them.
 
-The game's aesthetic is deliberate: green phosphor on black, monospace geometry, the low-frequency hum of hardware that has been running since before the internet. The 80s DOS terminal look is not nostalgia for its own sake — it is the correct visual register for a game about reading machine behavior at close range. The opossum that occasionally appears in the corner of your scope? She was here before you. She's not going anywhere.
+The game's aesthetic is deliberate: green phosphor on black, monospace geometry, the low-frequency hum of hardware that has been running since before the internet. The 80s DOS terminal look is not nostalgia for its own sake — it is the correct visual register for a game about reading machine behavior at close range.
+
+There is also an opossum. She has been living inside the rack unit — in the gap between the power supply and the chassis wall — for longer than anyone can determine. She is not part of the artifact. She is not a hint system or a mascot. She is simply present, and she reacts. When your diagnostic heat climbs she gets nervous. When you blow a fuse and the unit crashes she plays dead. When you finally crack a puzzle she stares into the light with an expression that is hard to read but unmistakably approving. She was here before you arrived. She will be here after you leave.
 
 ## The Artifact as Visualization Surface
 

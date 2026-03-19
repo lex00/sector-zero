@@ -59,6 +59,16 @@ type NetState struct {
 // TickMsg is sent by the animation ticker.
 type TickMsg time.Time
 
+// VictoryTickMsg is sent by the faster victory animation ticker.
+type VictoryTickMsg time.Time
+
+// VictoryTick returns a fast tick command for the victory animation.
+func VictoryTick() tea.Cmd {
+	return tea.Tick(80*time.Millisecond, func(t time.Time) tea.Msg {
+		return VictoryTickMsg(t)
+	})
+}
+
 // Model manages animated trace playback in the scope panel.
 type Model struct {
 	Trace       []Pulse
@@ -80,6 +90,9 @@ type Model struct {
 	BrailleNoise float64 // noise bleeds in at hot stage
 
 	LoopCount int // incremented each time the trace restarts from the beginning
+
+	Victory      bool // true after puzzle is solved — plays victory animation
+	VictoryFrame int  // current frame of the victory animation
 }
 
 // New returns an initialised scope Model.
@@ -137,6 +150,10 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			m.CurrentPulse++
 		}
 		return m, Tick()
+
+	case VictoryTickMsg:
+		m.VictoryFrame++
+		return m, VictoryTick()
 
 	case tea.WindowSizeMsg:
 		m.Width = msg.Width
@@ -267,7 +284,9 @@ func (m Model) View() string {
 	}
 
 	var brailleRows []string
-	if ns != nil {
+	if m.Victory {
+		brailleRows = m.renderVictory(innerW, innerH-2)
+	} else if ns != nil {
 		highlights := make(map[int]string)
 		if sigs, ok := m.signals[netName]; ok {
 			for sigName, positions := range sigs {
@@ -342,6 +361,100 @@ func (m Model) View() string {
 	}
 
 	return rendered
+}
+
+// victoryNoise returns a pseudo-random braille mask for cell (r, c) at frame f.
+// Uses a simple integer hash — fast and deterministic, good enough for animation.
+func victoryNoise(r, c, f int) byte {
+	x := uint32(r*0x9E3779B9) ^ uint32(c*0x6C62272E) ^ uint32(f*0x517CC1B7)
+	x ^= x >> 16
+	x *= 0x45D9F3B
+	x ^= x >> 16
+	return byte(x)
+}
+
+// renderVictory generates braille rows for the post-solve victory animation.
+// Three bright signal sweeps race horizontally across a field of random noise.
+func (m Model) renderVictory(width, height int) []string {
+	f := m.VictoryFrame
+
+	// Three horizontal signal sweeps at different row positions and speeds.
+	type sweep struct{ row, speed int }
+	sweeps := []sweep{
+		{height * 1 / 5, 3},
+		{height * 2 / 5, 2},
+		{height * 3 / 5, 4},
+	}
+
+	dimStyle    := lipgloss.NewStyle().Foreground(lipgloss.Color("2"))   // dark green
+	brightStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("14"))  // cyan
+
+	rows := make([]string, height)
+	for r := 0; r < height; r++ {
+		type cell struct {
+			ch     rune
+			bright bool
+		}
+		cells := make([]cell, width)
+
+		// Background: random braille noise, slowly shifting each frame.
+		for c := 0; c < width; c++ {
+			cells[c] = cell{ch: brailleChar(victoryNoise(r, c, f/3))}
+		}
+
+		// Overlay signal sweeps.
+		for _, sw := range sweeps {
+			// Column of the leading edge; wraps with a short off-screen pause.
+			col := (f*sw.speed)%(width+20) - 10
+			for dr := -1; dr <= 1; dr++ {
+				if r != sw.row+dr {
+					continue
+				}
+				// 5-cell wide pulse: full-dot cap at leading edge, fading behind.
+				widths := []struct {
+					dc   int
+					full bool
+				}{
+					{0, true}, {-1, true}, {1, false}, {-2, false}, {-3, false},
+				}
+				for _, w := range widths {
+					c := col + w.dc
+					if c >= 0 && c < width {
+						var mask byte
+						if w.full {
+							mask = 0xFF
+						} else {
+							mask = victoryNoise(r, c, f)&0xAA | 0x55
+						}
+						cells[c] = cell{ch: brailleChar(mask), bright: true}
+					}
+				}
+			}
+		}
+
+		// Render grouped runs of same-brightness cells.
+		var sb strings.Builder
+		i := 0
+		for i < width {
+			bright := cells[i].bright
+			j := i
+			for j < width && cells[j].bright == bright {
+				j++
+			}
+			var seg strings.Builder
+			for k := i; k < j; k++ {
+				seg.WriteRune(cells[k].ch)
+			}
+			if bright {
+				sb.WriteString(brightStyle.Render(seg.String()))
+			} else {
+				sb.WriteString(dimStyle.Render(seg.String()))
+			}
+			i = j
+		}
+		rows[r] = sb.String()
+	}
+	return rows
 }
 
 // renderPins builds a pin-label row beneath the braille chart.

@@ -70,7 +70,21 @@ The naming (BLACKOUT → OPEN) is intentional: it maps to the metaphor of adjust
 
 ---
 
-## 5. Heat Mechanic
+## 5. The Opossum
+
+**Decision:** An opossum lives inside the rack unit. She is always visible. Her behavior is tied directly to game state.
+
+**Why:** The station needs to feel inhabited. Without her, the relay post is just a screen full of green text — atmospheric but cold. The opossum makes it a place. Something was here before you. Something is watching.
+
+She is not a tutorial character. She does not speak. She does not give hints. She reacts. Her states map directly to game mechanics: idle when nothing is happening, nervous as heat climbs, afraid as fuses run low, dead when thermal overload hits, recovering during reboot, awed when a puzzle is solved. A player who is paying attention will learn to read her before they consciously realize they are doing it.
+
+The naming convention matters: her reactions are written as stage directions in italics — *ears perk*, *backs toward the tunnel entrance*, *plays dead*, *stares into the light*. This keeps her presence legible without breaking the fiction that you are looking at diagnostic output. She is not a character in a cutscene. She is an annotation on the signal.
+
+The question of why there is an opossum inside alien hardware is left unanswered. The artifact predates human documentation. So does she.
+
+---
+
+## 7. Heat Mechanic
 
 **Decision:** Each incorrect submission raises the player's heat. High heat depletes fuses. Cooling requires time between submissions.
 
@@ -84,7 +98,7 @@ The mechanic is designed to feel like hardware, not penalty: you are not being p
 
 ---
 
-## 6. Trace-as-Ground-Truth
+## 8. Trace-as-Ground-Truth
 
 **Decision:** Correctness is evaluated by comparing the player's full Trace against the reference Trace, pulse by pulse. A correct final array is not sufficient to pass a puzzle.
 
@@ -98,7 +112,7 @@ The practical implication: if a puzzle is based on a specific variant of an algo
 
 ---
 
-## 7. Multi-Language Support
+## 9. Multi-Language Support
 
 **Decision:** The Probe library is available in multiple languages: Python, Go, JavaScript, Ruby, Rust, and Java.
 
@@ -110,7 +124,7 @@ The Trace format is the contract. As long as a Probe emits valid NDJSON in the t
 
 ---
 
-## 8. No External LSP
+## 10. No External LSP
 
 **Decision:** The game does not integrate with any Language Server Protocol implementation. There is no in-editor autocomplete, type checking, or documentation hover for the Probe API.
 

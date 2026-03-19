@@ -4,7 +4,9 @@
 
 Sector Zero is a gamified algorithm puzzle game for your terminal. You are stationed at a decommissioned relay post with a piece of alien hardware that is still drawing power. It runs processes you don't recognize. Your job is to study its behavior — pulse by pulse, frame by frame — and reproduce it exactly.
 
-No algorithm names. No hints about what you're looking at. Just the signal.
+An opossum has been living inside the rack unit. She was here before you arrived and she has opinions about how the work is going. Watch her. When the heat climbs she gets nervous. When you blow a fuse she plays dead. When you crack a puzzle she stares into the light like she always knew you would.
+
+No algorithm names. No hints about what you're looking at. Just the signal — and the opossum.
 
 ---
 

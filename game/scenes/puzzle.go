@@ -69,7 +69,6 @@ type Puzzle struct {
 	LastKeystroke    time.Time
 	running          bool
 	solved           bool
-	solvedLoopTarget int  // LoopCount value that triggers the "advance" popup
 	gated            bool // true = ^R blocked until animation loops once
 	runAttempts      int
 	playerTrace      []scope.Pulse // last trace from player's run
@@ -321,10 +320,8 @@ func (m Puzzle) Update(msg tea.Msg) (Puzzle, tea.Cmd) {
 				m.OpossumModel.StateFromSolve()
 				m.HeatModel.Set(0)
 				m.solved = true
-				// Go fullscreen immediately and wait for one full loop before advancing.
-				m.FullscreenScope = true
-				m.ScopeModel.Paused = false
-				m.solvedLoopTarget = m.ScopeModel.LoopCount + 1
+				m.ScopeModel.Victory = true
+				cmds = append(cmds, scope.VictoryTick())
 			} else {
 				// Append score so the player can see proximity.
 				popMsg += fmt.Sprintf("\n\nscore: %d%%", int(result.Score*100))
@@ -332,6 +329,17 @@ func (m Puzzle) Update(msg tea.Msg) (Puzzle, tea.Cmd) {
 				m.HeatModel.Add(result.HeatDelta)
 				m.OpossumModel.UpdateFromHeat(m.HeatModel.Level())
 			}
+		}
+
+	case scope.VictoryTickMsg:
+		scopeM, cmd := m.ScopeModel.Update(msg)
+		m.ScopeModel = scopeM
+		cmds = append(cmds, cmd)
+		// Show the congratulations popup after ~2 seconds of animation (25 frames × 80ms).
+		if m.solved && m.popup == nil && m.ScopeModel.VictoryFrame >= 25 {
+			s := "congratulations.\n\npress any key to continue."
+			m.popup = &s
+			m.popupStyle = "solved"
 		}
 
 	case scope.TickMsg:
@@ -342,12 +350,6 @@ func (m Puzzle) Update(msg tea.Msg) (Puzzle, tea.Cmd) {
 		// Clear gate when the reference animation completes its first full loop.
 		if m.gated && !m.scopeShowsPlayer && m.ScopeModel.LoopCount > prevLoops {
 			m.gated = false
-		}
-		// After solving: show "advancing" popup once the animation completes one loop.
-		if m.solved && m.popup == nil && m.ScopeModel.LoopCount >= m.solvedLoopTarget {
-			msg := "puzzle solved.\n\nadvancing to next puzzle..."
-			m.popup = &msg
-			m.popupStyle = "solved"
 		}
 		// Sync the choice panel gutter with the current animation pulse.
 		if cp := m.ScopeModel.CurrentPulse; cp > 0 && cp <= len(m.ScopeModel.Trace) {
