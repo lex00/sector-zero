@@ -1,7 +1,7 @@
 package puzzles
 
 func init() {
-	Register(PuzzleSpec{
+	Register(Puzzle{
 		ID:        2,
 		Title:     "Linear Search",
 		TraceFile: "data/02_linear_search.trace",

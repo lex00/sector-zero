@@ -1,14 +1,81 @@
 package puzzles
 
-// PuzzleSpec is the strongly-typed plugin definition for one puzzle.
+import (
+	"fmt"
+
+	"github.com/lex00/sector-zero/game/scope"
+)
+
+// Puzzle is the strongly-typed plugin definition for one puzzle.
 // All fields are required — missing fields won't compile.
-type PuzzleSpec struct {
+type Puzzle struct {
 	ID        int
 	Title     string
 	TraceFile string // relative to puzzles/data/
 	Dialogue  DialogueSpec
 	Challenge ChallengeSpec
 	Script    []LessonStep
+}
+
+// Validate checks that all required fields are populated.
+// Called by Register — panics at startup if a puzzle is malformed.
+func (p Puzzle) Validate() error {
+	if p.ID <= 0 {
+		return fmt.Errorf("puzzle ID must be > 0, got %d", p.ID)
+	}
+	if p.Title == "" {
+		return fmt.Errorf("puzzle %d: Title is empty", p.ID)
+	}
+	if p.TraceFile == "" {
+		return fmt.Errorf("puzzle %d: TraceFile is empty", p.ID)
+	}
+	if len(p.Challenge.Template) == 0 {
+		return fmt.Errorf("puzzle %d: Challenge.Template is empty", p.ID)
+	}
+	if len(p.Challenge.Blanks) == 0 {
+		return fmt.Errorf("puzzle %d: Challenge.Blanks is empty", p.ID)
+	}
+	return nil
+}
+
+// LoadTrace reads and parses the embedded trace file for this puzzle.
+func (p Puzzle) LoadTrace() ([]scope.Pulse, error) {
+	data, err := puzzleData.ReadFile(p.TraceFile)
+	if err != nil {
+		return nil, fmt.Errorf("load trace %q: %w", p.TraceFile, err)
+	}
+	return scope.ParseTrace(data)
+}
+
+// GetDialogue returns the dialogue text for a given help level and hint key.
+// Falls back through levels: try exact level first, then SIGNAL→STATIC→BLACKOUT
+// (OPEN is not included in the fallback chain).
+func (p Puzzle) GetDialogue(helpLevel, hintKey string) string {
+	levels := map[string]HintSet{
+		"BLACKOUT": p.Dialogue.Blackout,
+		"STATIC":   p.Dialogue.Static,
+		"SIGNAL":   p.Dialogue.Signal,
+		"OPEN":     p.Dialogue.Open,
+	}
+	if h, ok := levels[helpLevel]; ok {
+		if s := pick(h, hintKey); s != "" {
+			return s
+		}
+	}
+	for _, lvl := range []string{"SIGNAL", "STATIC", "BLACKOUT"} {
+		if lvl == helpLevel {
+			continue
+		}
+		if s := pick(levels[lvl], hintKey); s != "" {
+			return s
+		}
+	}
+	return "*...*"
+}
+
+// pick looks up a hint key in a HintSet and returns the value if non-empty.
+func pick(h HintSet, key string) string {
+	return h.toMap()[key]
 }
 
 // DialogueSpec holds hints at all four difficulty levels.
@@ -35,7 +102,7 @@ func (h HintSet) isEmpty() bool {
 		h.WrongTermination == "" && h.Near == "" && h.Exact == ""
 }
 
-// toMap converts a HintSet to the map[string]string shape GetDialogue expects.
+// toMap converts a HintSet to a map[string]string for key-based lookup.
 func (h HintSet) toMap() map[string]string {
 	return map[string]string{
 		"empty":             h.Empty,

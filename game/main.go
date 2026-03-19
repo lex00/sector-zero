@@ -13,7 +13,7 @@ import (
 
 // topModel is the root Bubble Tea model that owns scene routing.
 type topModel struct {
-	scene  string // "intro"|"puzzle"|"boom"|"reboot"
+	scene  scenes.SceneID
 	width  int
 	height int
 
@@ -31,7 +31,7 @@ func initialModel() topModel {
 	}
 
 	return topModel{
-		scene: "intro",
+		scene: scenes.SceneIntro,
 		sv:    sv,
 		intro: scenes.NewIntro(0, 0), // dimensions updated on first WindowSizeMsg
 	}
@@ -49,13 +49,13 @@ func (m topModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.height = msg.Height
 		// Pass resize to active sub-model.
 		switch m.scene {
-		case "intro":
+		case scenes.SceneIntro:
 			m.intro, _ = m.intro.Update(msg)
-		case "puzzle":
+		case scenes.ScenePuzzle:
 			m.puzzle, _ = m.puzzle.Update(msg)
-		case "boom":
+		case scenes.SceneBoom:
 			m.boom, _ = m.boom.Update(msg)
-		case "reboot":
+		case scenes.SceneReboot:
 			m.reboot, _ = m.reboot.Update(msg)
 		}
 		return m, nil
@@ -67,12 +67,12 @@ func (m topModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case scenes.RebootMsg:
 		_ = msg
-		return m.transitionTo("reboot")
+		return m.transitionTo(scenes.SceneReboot)
 
 	case scenes.RebootDoneMsg:
 		_ = msg
 		// After reboot: restore puzzle with reduced heat and one fewer fuse.
-		return m.transitionTo("puzzle")
+		return m.transitionTo(scenes.ScenePuzzle)
 
 	case scenes.SolvedMsg:
 		// Mark puzzle complete in save, advance to next puzzle.
@@ -82,17 +82,21 @@ func (m topModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			next = 1 // loop back for now
 		}
 		m.sv.CurrentPuzzle = next
-		_ = m.sv.Write()
-		return m.transitionTo("puzzle")
+		if err := m.sv.Write(); err != nil {
+			fmt.Fprintf(os.Stderr, "save: %v\n", err)
+		}
+		return m.transitionTo(scenes.ScenePuzzle)
 
 	case scenes.PuzzleQuitMsg:
 		_ = msg
 		// Save state and quit.
-		m.sv.Heat = m.puzzle.HeatModel.Level()
-		m.sv.FusesRemaining = m.puzzle.HeatModel.FuseCount()
+		m.sv.Heat = m.puzzle.HeatLevel()
+		m.sv.FusesRemaining = m.puzzle.FuseCount()
 		m.sv.CurrentPuzzle = m.puzzle.PuzzleData.ID
-		m.sv.HelpLevel = helpLevelString(m.puzzle.HelpLevel)
-		_ = m.sv.Write()
+		m.sv.HelpLevel = m.puzzle.HelpLevel.String()
+		if err := m.sv.Write(); err != nil {
+			fmt.Fprintf(os.Stderr, "save: %v\n", err)
+		}
 		return m, tea.Quit
 	}
 
@@ -100,13 +104,13 @@ func (m topModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	var cmd tea.Cmd
 	switch m.scene {
-	case "intro":
+	case scenes.SceneIntro:
 		m.intro, cmd = m.intro.Update(msg)
-	case "puzzle":
+	case scenes.ScenePuzzle:
 		m.puzzle, cmd = m.puzzle.Update(msg)
-	case "boom":
+	case scenes.SceneBoom:
 		m.boom, cmd = m.boom.Update(msg)
-	case "reboot":
+	case scenes.SceneReboot:
 		m.reboot, cmd = m.reboot.Update(msg)
 	}
 	return m, cmd
@@ -114,13 +118,13 @@ func (m topModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m topModel) View() string {
 	switch m.scene {
-	case "intro":
+	case scenes.SceneIntro:
 		return m.intro.View()
-	case "puzzle":
+	case scenes.ScenePuzzle:
 		return m.puzzle.View()
-	case "boom":
+	case scenes.SceneBoom:
 		return m.boom.View()
-	case "reboot":
+	case scenes.SceneReboot:
 		return m.reboot.View()
 	default:
 		return "loading..."
@@ -128,16 +132,16 @@ func (m topModel) View() string {
 }
 
 // transitionTo switches to a new scene and returns the initialised model + cmd.
-func (m topModel) transitionTo(scene string) (tea.Model, tea.Cmd) {
+func (m topModel) transitionTo(scene scenes.SceneID) (tea.Model, tea.Cmd) {
 	m.scene = scene
 	switch scene {
-	case "intro":
+	case scenes.SceneIntro:
 		intro := scenes.NewIntro(m.width, m.height)
 		var cmd tea.Cmd
 		m.intro, cmd = intro.Init()
 		return m, cmd
 
-	case "puzzle":
+	case scenes.ScenePuzzle:
 		pz := puzzles.GetPuzzle(m.sv.CurrentPuzzle)
 		fuses := m.sv.FusesRemaining
 		if fuses <= 0 {
@@ -154,18 +158,20 @@ func (m topModel) transitionTo(scene string) (tea.Model, tea.Cmd) {
 		m.puzzle, cmd = pzScene.Init()
 		return m, cmd
 
-	case "boom":
+	case scenes.SceneBoom:
 		boom := scenes.NewBoom(m.width, m.height)
 		var cmd tea.Cmd
 		m.boom, cmd = boom.Init()
 		return m, cmd
 
-	case "reboot":
+	case scenes.SceneReboot:
 		// Burn a fuse.
-		m.puzzle.HeatModel.Boom()
-		m.sv.FusesRemaining = m.puzzle.HeatModel.FuseCount()
-		m.sv.Heat = m.puzzle.HeatModel.Level()
-		_ = m.sv.Write()
+		m.puzzle.TriggerBoom()
+		m.sv.FusesRemaining = m.puzzle.FuseCount()
+		m.sv.Heat = m.puzzle.HeatLevel()
+		if err := m.sv.Write(); err != nil {
+			fmt.Fprintf(os.Stderr, "save: %v\n", err)
+		}
 
 		reboot := scenes.NewReboot(m.width, m.height)
 		var cmd tea.Cmd
@@ -174,14 +180,6 @@ func (m topModel) transitionTo(scene string) (tea.Model, tea.Cmd) {
 	}
 
 	return m, nil
-}
-
-func helpLevelString(idx int) string {
-	levels := []string{"BLACKOUT", "STATIC", "SIGNAL", "OPEN"}
-	if idx >= 0 && idx < len(levels) {
-		return levels[idx]
-	}
-	return "SIGNAL"
 }
 
 func appendUnique(slice []int, val int) []int {

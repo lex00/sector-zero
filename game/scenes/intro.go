@@ -33,11 +33,21 @@ var introLines = []string{
 	"[ press any key ]",
 }
 
+// SceneID identifies a named scene in the top-level router.
+type SceneID uint8
+
+const (
+	SceneIntro  SceneID = iota
+	ScenePuzzle
+	SceneBoom
+	SceneReboot
+)
+
 // IntroTickMsg advances the line reveal.
 type IntroTickMsg time.Time
 
 // TransitionMsg asks the top-level model to switch scenes.
-type TransitionMsg struct{ Scene string }
+type TransitionMsg struct{ Scene SceneID }
 
 // Intro is the intro scene model.
 type Intro struct {
@@ -85,7 +95,7 @@ func (m Intro) Update(msg tea.Msg) (Intro, tea.Cmd) {
 	case tea.KeyMsg:
 		_ = msg
 		if m.Done {
-			return m, func() tea.Msg { return TransitionMsg{Scene: "puzzle"} }
+			return m, func() tea.Msg { return TransitionMsg{Scene: ScenePuzzle} }
 		}
 		// Pressing a key before all lines are revealed shows them all at once.
 		m.Revealed = len(m.Lines)

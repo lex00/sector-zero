@@ -73,6 +73,49 @@ func Load() (Save, error) {
 	return s, nil
 }
 
+// HelpLevel represents the tutorial-assistance tier.
+type HelpLevel int
+
+const (
+	HelpBlackout HelpLevel = 0 // no hints at all
+	HelpStatic   HelpLevel = 1 // scaffold code only
+	HelpSignal   HelpLevel = 2 // scaffold + dialogue
+	HelpOpen     HelpLevel = 3 // choice-panel guided mode
+)
+
+// HelpLevelFromString converts a string like "SIGNAL" to the corresponding HelpLevel.
+// Defaults to HelpSignal if the string is not recognised.
+func HelpLevelFromString(s string) HelpLevel {
+	switch s {
+	case "BLACKOUT":
+		return HelpBlackout
+	case "STATIC":
+		return HelpStatic
+	case "SIGNAL":
+		return HelpSignal
+	case "OPEN":
+		return HelpOpen
+	default:
+		return HelpSignal
+	}
+}
+
+// String returns the canonical string representation of a HelpLevel.
+func (h HelpLevel) String() string {
+	switch h {
+	case HelpBlackout:
+		return "BLACKOUT"
+	case HelpStatic:
+		return "STATIC"
+	case HelpSignal:
+		return "SIGNAL"
+	case HelpOpen:
+		return "OPEN"
+	default:
+		return "SIGNAL"
+	}
+}
+
 // Write serialises the Save and writes it to ~/.sector-zero/save.json,
 // creating the directory if necessary.
 func (s Save) Write() error {

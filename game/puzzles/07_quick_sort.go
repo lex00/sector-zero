@@ -1,7 +1,7 @@
 package puzzles
 
 func init() {
-	Register(PuzzleSpec{
+	Register(Puzzle{
 		ID:        7,
 		Title:     "Quick Sort",
 		TraceFile: "data/07_quick_sort.trace",

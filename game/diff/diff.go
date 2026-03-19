@@ -8,8 +8,7 @@ import (
 type Result struct {
 	Score    float64 // 0.0-1.0
 	Category string  // "empty"|"wrong_types"|"wrong_order"|"wrong_termination"|"near"|"exact"
-	HeatDelta float64
-	HintKey  string // key for dialogue lookup
+	HintKey  string  // key for dialogue lookup
 }
 
 // algorithmicTypes are the pulse types that represent actual algorithmic
@@ -45,10 +44,9 @@ func Diff(player []scope.Pulse, target []scope.Pulse) Result {
 
 	if len(player) == 0 {
 		return Result{
-			Score:     0,
-			Category:  "empty",
-			HeatDelta: 0.20,
-			HintKey:   "empty",
+			Score:    0,
+			Category: "empty",
+			HintKey:  "empty",
 		}
 	}
 
@@ -66,36 +64,28 @@ func Diff(player []scope.Pulse, target []scope.Pulse) Result {
 	score := typeScore*0.6 + posScore*0.4
 
 	var category string
-	var heatDelta float64
 
 	switch {
 	case score == 1.0 && hasDone == targetHasDone:
 		category = "exact"
-		heatDelta = 0
 	case score >= 0.90:
 		if targetHasDone && !hasDone {
 			category = "wrong_termination"
-			heatDelta = 0.08
 		} else {
 			category = "near"
-			heatDelta = 0.05
 		}
 	case score >= 0.60:
 		category = "wrong_order"
-		heatDelta = 0.10
 	case score >= 0.30:
 		category = "wrong_types"
-		heatDelta = 0.15
 	default:
 		category = "wrong_types"
-		heatDelta = 0.20
 	}
 
 	return Result{
-		Score:     score,
-		Category:  category,
-		HeatDelta: heatDelta,
-		HintKey:   category,
+		Score:    score,
+		Category: category,
+		HintKey:  category,
 	}
 }
 
